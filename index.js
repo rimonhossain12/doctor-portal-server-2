@@ -27,8 +27,17 @@ async function run() {
             const cursor = appointmentsCollection.find(query);
             console.log('query = ', query);
             const appointments = await cursor.toArray();
-            console.log(appointments);
             res.json(appointments);
+        })
+
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            let isAdmin = false;
+            if (user?.role === 'admin') {
+                isAdmin = true;
+            } res.json({ admin: isAdmin });
         })
 
         app.post('/appointments', async (req, res) => {
@@ -37,23 +46,30 @@ async function run() {
             res.json(result);
         });
 
-        app.post('/users',async(req,res) => {
+        app.post('/users', async (req, res) => {
             const user = req.body;
             const result = await usersCollection.insertOne(user);
-            console.log('result found',result);
+            console.log('result found', result);
             res.json(result);
         });
 
-        app.put('/users',async(req,res) => {
+        app.put('/users', async (req, res) => {
             const user = req.body;
-            console.log('Put',user);
-            const filter = {email:user.email};
+            const filter = { email: user.email };
             const options = { upsert: true };
-            const updateDoc = {$set:user};
-            const result = await usersCollection.updateOne(filter,updateDoc,options);
+            const updateDoc = { $set: user };
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
             console.log(result);
             res.json(result);
+        });
 
+        app.put('/users/admin', async (req, res) => {
+            const user = req.body;
+            console.log('put', user);
+            const filter = { email: user.email };
+            const updateDoc = { $set: { role: 'admin' } };
+            const result = await usersCollection.updateOne(filter, updateDoc);
+            res.json(result);
         })
     }
     finally {
