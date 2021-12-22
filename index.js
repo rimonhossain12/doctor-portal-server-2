@@ -5,6 +5,10 @@ require('dotenv').config()
 const cors = require('cors');
 const port = process.env.PORT || 5000;
 
+// 
+
+const { request } = require('express');
+
 // middleware
 app.use(cors());
 app.use(express.json());
@@ -12,6 +16,7 @@ app.use(express.json());
 // data base is connection
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.5bitd.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+
 
 async function run() {
     try {
@@ -25,7 +30,6 @@ async function run() {
             const date = new Date(req.query.date).toLocaleDateString();
             const query = { email: email, date };
             const cursor = appointmentsCollection.find(query);
-            console.log('query = ', query);
             const appointments = await cursor.toArray();
             res.json(appointments);
         })
@@ -49,7 +53,6 @@ async function run() {
         app.post('/users', async (req, res) => {
             const user = req.body;
             const result = await usersCollection.insertOne(user);
-            console.log('result found', result);
             res.json(result);
         });
 
@@ -59,24 +62,15 @@ async function run() {
             const options = { upsert: true };
             const updateDoc = { $set: user };
             const result = await usersCollection.updateOne(filter, updateDoc, options);
-            console.log(result);
             res.json(result);
         });
-
-        app.put('/users/admin', async (req, res) => {
-            const user = req.body;
-            console.log('put', user);
-            const filter = { email: user.email };
-            const updateDoc = { $set: { role: 'admin' } };
-            const result = await usersCollection.updateOne(filter, updateDoc);
-            res.json(result);
-        })
     }
     finally {
+
     }
 }
-run().catch(console.dir);
 
+run().catch(console.dir);
 app.get('/', (req, res) => {
     res.send('Hello Doctor Portal!');
 })
@@ -84,6 +78,7 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log('Running On port', port);
 })
+
 
     // 01 / Hope(Faizan Hashmi)
     // 02 / Ahat Islam
